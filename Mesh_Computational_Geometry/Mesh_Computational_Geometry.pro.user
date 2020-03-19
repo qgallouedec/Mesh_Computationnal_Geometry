@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.5.0, 2020-03-19T13:44:20. -->
+<!-- Written by QtCreator 4.5.0, 2020-03-19T14:22:46. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -285,8 +285,8 @@
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Mesh_Computational_Geometry</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:C:/Users/William/Desktop/ECL/SCOLAIRE/3A/OPTION ET MOS/CMGIG/NouveauNouveau/Mesh_Computational_Geometry/Mesh_Computational_Geometry.pro</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Mesh_Computational_Geometry2</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:C:/Users/William/Mesh_Computationnal_Geometry/Mesh_Computational_Geometry/Mesh_Computational_Geometry.pro</value>
     <value type="bool" key="QmakeProjectManager.QmakeRunConfiguration.UseLibrarySearchPath">true</value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.CommandLineArguments"></value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.ProFile">Mesh_Computational_Geometry.pro</value>
