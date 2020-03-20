@@ -82,12 +82,12 @@
        <rect>
         <x>10</x>
         <y>20</y>
-        <width>86</width>
+        <width>111</width>
         <height>20</height>
        </rect>
       </property>
       <property name="text">
-       <string>Edges</string>
+       <string>Show edges</string>
       </property>
      </widget>
     </widget>
@@ -108,12 +108,12 @@
        <rect>
         <x>10</x>
         <y>20</y>
-        <width>86</width>
+        <width>111</width>
         <height>20</height>
        </rect>
       </property>
       <property name="text">
-       <string>Faces</string>
+       <string>Show faces</string>
       </property>
      </widget>
     </widget>
