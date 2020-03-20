@@ -84,11 +84,14 @@ public:
 
     double vertexInCircumscribingCircle(Face face, Vertex P);
     bool isDelaunay(int i_face1, int i_vertex_oppose_1);
-    void flipEdge(int i_face1, int i_vertex_oppose_1_initial);
+    QQueue<std::pair<int, int>> flipEdge(int i_face1, int i_vertex_oppose_1_initial);
     double orientationTest(Vertex A, Vertex B, Vertex C);
     double inTriangleTest(Face face, Vertex P);
     void insertionTriangle(int i_P, int i_face);
     void naiveInsertion();
+    bool areteEnBordure(int i_face, int i_vertex);
+    std::pair<int, int> areteSymetrique(std::pair<int, int> face_et_vertex);
+    void lawson();
 };
 
 class Circulator_on_faces

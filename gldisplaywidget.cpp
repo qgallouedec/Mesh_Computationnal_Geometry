@@ -24,6 +24,8 @@ GLDisplayWidget::GLDisplayWidget(QWidget *parent) : QGLWidget(parent)
     show_edges = false;
     show_faces = false;
     show_laplacian = false;
+    coef_laplacian = 0;
+    _angle = 0;
 
     // Update the scene
     connect( &_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
@@ -46,8 +48,8 @@ void GLDisplayWidget::initializeGL()
     _mesh.sew();
 
     //_mesh.computeLaplacian();
-    //_mesh.naiveInsertion();
-    //_mesh.test();
+    _mesh.naiveInsertion();
+    //_mesh.lawson();
 }
 
 void GLDisplayWidget::paintGL(){
