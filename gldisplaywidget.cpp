@@ -7,7 +7,6 @@
 #include <iostream>
 #include "QDebug"
 
-
 // The following functions could be displaced into a module OpenGLDisplayMesh that would include Mesh
 // Draw a vertex
 void glVertexDraw(const Vertex & p) {
@@ -43,12 +42,19 @@ void GLDisplayWidget::initializeGL()
     glEnable(GL_COLOR_MATERIAL);
 
     // Construction of the mesh before it is displayed
-    _mesh.parseFile("/Users/William/Desktop/ECL/SCOLAIRE/3A/OPTION ET MOS/CMGIG/Fichiers terrains OFF/franke4.off");
-    //_mesh.parseFile("/Users/quentingallouedec/GitHub/Mesh_Computationnal_Geometry/off_files/franke4.off");
+//    char path_to_off_files[512]="/path/to/directory/Mesh_Computationnal_Geometry/off_files/";
+    char off_filename[64]="queen.off";
+
+    char path_to_off_files[512]="/Users/quentingallouedec/GitHub/Mesh_Computationnal_Geometry/off_files/";
+
+    char path_to_off_file[512]="";
+    strcat (path_to_off_file, path_to_off_files);
+    strcat (path_to_off_file, off_filename);
+    _mesh.parseFile(path_to_off_file);
     _mesh.sew();
 
-    //_mesh.computeLaplacian();
-    _mesh.naiveInsertion();
+    _mesh.computeLaplacian();
+    //_mesh.naiveInsertion();
     //_mesh.lawson();
 }
 
@@ -69,6 +75,7 @@ void GLDisplayWidget::paintGL(){
 
     // Color for your mesh
     glColor3f(0, 1 ,0);
+
 
     if(show_vertecis){drawVertices();}
     if(show_edges){drawEdges();}
@@ -161,7 +168,7 @@ void GLDisplayWidget::mouseMoveEvent(QMouseEvent *event)
 // Mouse Management for the zoom
 void GLDisplayWidget::wheelEvent(QWheelEvent *event) {
     QPoint numDegrees = event->angleDelta();
-    double stepZoom = 0.25;
+    double stepZoom = 0.1;
     if (!numDegrees.isNull())
     {
       _Z = (numDegrees.x() > 0 || numDegrees.y() > 0) ? _Z + stepZoom : _Z - stepZoom;
