@@ -3,6 +3,8 @@
 
 #include <QGLWidget>
 #include <iostream>
+#include <QQueue>
+#include <QList>
 
 #include<cmath>
 
@@ -84,14 +86,15 @@ public:
 
     double vertexInCircumscribingCircle(Face face, Vertex P);
     bool isDelaunay(int i_face1, int i_vertex_oppose_1);
-    QQueue<std::pair<int, int>> flipEdge(int i_face1, int i_vertex_oppose_1_initial);
+    QList<std::pair<int, int>> flipEdge(int i_face1, int i_vertex_oppose_1_initial);
     double orientationTest(Vertex A, Vertex B, Vertex C);
     double inTriangleTest(Face face, Vertex P);
     void insertionTriangle(int i_P, int i_face);
+    void insertionInArete(int i_face1, int i_P);
     void naiveInsertion();
     bool areteEnBordure(int i_face, int i_vertex);
     std::pair<int, int> areteSymetrique(std::pair<int, int> face_et_vertex);
-    void lawson();
+    void lawsonAroundVertex(int i_P);
 };
 
 class Circulator_on_faces

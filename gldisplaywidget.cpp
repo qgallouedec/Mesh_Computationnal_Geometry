@@ -43,13 +43,12 @@ void GLDisplayWidget::initializeGL()
     glEnable(GL_COLOR_MATERIAL);
 
     // Construction of the mesh before it is displayed
-    _mesh.parseFile("/Users/William/Desktop/ECL/SCOLAIRE/3A/OPTION ET MOS/CMGIG/Fichiers terrains OFF/franke4.off");
+    _mesh.parseFile("/Users/William/Desktop/ECL/SCOLAIRE/3A/OPTION ET MOS/CMGIG/Fichiers terrains OFF/franketest.off");
     //_mesh.parseFile("/Users/quentingallouedec/GitHub/Mesh_Computationnal_Geometry/off_files/cube.off");
     _mesh.sew();
 
     //_mesh.computeLaplacian();
     _mesh.naiveInsertion();
-    //_mesh.lawson();
 }
 
 void GLDisplayWidget::paintGL(){

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string>
 #include <QQueue>
+#include <QList>
 
 // ------------Functions-----------
 double cotan(const Vertex vertex1, const Vertex vertex2)
@@ -96,7 +97,8 @@ void Mesh::parseFile(const char file_name[])
     for(int i_vertex = 0; i_vertex < nb_vertex; i_vertex++)
     {
         fscanf(pFile, "%lf %lf %lf\n", &x, &y, &z); // Stockage de la ligne lue
-        verticesTab.push_back(Vertex(x,y,z)); // Ajout du point dans le vecteur verticesTab
+        // MODIF !!!!!!!!!
+        verticesTab.push_back(Vertex(x-.5,y-.5,0)); // Ajout du point dans le vecteur verticesTab
     }
 
     int n_face, i_vertex0, i_vertex1, i_vertex2;
@@ -212,9 +214,6 @@ void Mesh::test()
     // std::cout << "y " << (verticesTab[face.i_vertex[0]]).y() << std::endl;
     // std::cout << "z " << (verticesTab[face.i_vertex[0]]).z() << std::endl;
     // std::cout << result << std::endl;
-
-
-
 }
 
 Vertex * Mesh::vertices_begin()
@@ -316,17 +315,16 @@ double Mesh::vertexInCircumscribingCircle(Face face, Vertex P)
     Vertex AP_hyper = P_hyper - A_hyper;
 
     Vertex pdtVect = AB_hyper.cross(AC_hyper);
-    double pdtScal = - (pdtVect * AP_hyper);
+    double pdtScal = (-1)* (pdtVect * AP_hyper);
 
     // si pdtScal < 0, alors P en dehors du cercle circonscrit
     // si pdtScal > 0, alors P en dans le cercle circonscrit
     return pdtScal;
-
 }
 
 bool Mesh::isDelaunay(int i_face1, int i_vertex_oppose_1)
 {
-
+    // On test la qualité "être de Delaunay" seulement sur le plan x, y
     Face face1 = facesTab[i_face1];
     Face face2;
     if (face1.i_vertex[0] == i_vertex_oppose_1){
@@ -349,13 +347,13 @@ bool Mesh::isDelaunay(int i_face1, int i_vertex_oppose_1)
     double test2 = vertexInCircumscribingCircle(face2, verticesTab[i_vertex_oppose_1]);
 
     // On demande à ce que les points soient sur la bordure ou strictement à l'extérieur du cercle
-    return ((test1 <= 0) && (test2 <= 0));
+    return ((test1 <= 0) && (test2 <= 0)); // STRICTEMENT
 }
 
-QQueue<std::pair<int, int>> Mesh::flipEdge(int i_face1, int i_vertex_oppose_1_initial){
+QList<std::pair<int, int>> Mesh::flipEdge(int i_face1, int i_vertex_oppose_1_initial){
     // Cette fonction fait le flip de l'edge en question
     // (Il faudra verifier avant de l'utiliser qu'on ne se trouve pas sur un bord)
-    // Et elle renvoi les 4 aretes encadrant l'arete flipée dans une queue de taille 4
+    // Et elle renvoi les 2 aretes encadrant l'arete flipée et opposées au vertex initial dans une queue de taille 2
     // (Pour faciliter l'algorithme de Lawson)
 
     // Initialisation des valeurs
@@ -462,19 +460,20 @@ QQueue<std::pair<int, int>> Mesh::flipEdge(int i_face1, int i_vertex_oppose_1_in
     verticesTab[i_vertex_b].i_incident_face = i_face2;
 
     // std::cout<<"debut aretes quadrilatere : "<< i_face1 << ", "<<i_vertex_oppose_1_initial<<" ,"<<std::endl;
-    QQueue < std::pair <int, int> > aretes_quadrilatere;
-    aretes_quadrilatere.enqueue({i_face1, i_vertex_a}); // arete f6
-    aretes_quadrilatere.enqueue({i_face1, i_vertex_c}); // arete f3
-    aretes_quadrilatere.enqueue({i_face2, i_vertex_a}); // arete f5
-    aretes_quadrilatere.enqueue({i_face2, i_vertex_c}); // arete f4
+    QList < std::pair <int, int> > aretes_quadrilatere;
+    aretes_quadrilatere.append({i_face1, i_vertex_a}); // arete f6
+    //aretes_quadrilatere.append({i_face1, i_vertex_c}); // arete f3
+    aretes_quadrilatere.append({i_face2, i_vertex_a}); // arete f5
+    //aretes_quadrilatere.append({i_face2, i_vertex_c}); // arete f4
 
     return aretes_quadrilatere;
-
 }
 
 double Mesh::orientationTest(Vertex A, Vertex B, Vertex C){
 
     // Positif si orientes dans le sens trigo
+    // = 0 <=> points alignés
+
     // On travaille dans le plan z = 0
 
     Vertex AB = B - A;
@@ -497,9 +496,9 @@ double Mesh::inTriangleTest(Face face, Vertex P){
     Vertex B = verticesTab[face.i_vertex[1]];
     Vertex C = verticesTab[face.i_vertex[2]];
 
-    double test1 = orientationTest(A, B, P)*nb_vertex;
-    double test2 = orientationTest(B, C, P)*nb_vertex;
-    double test3 = orientationTest(C, A, P)*nb_vertex;
+    double test1 = orientationTest(A, B, P)*nb_vertex*nb_vertex;
+    double test2 = orientationTest(B, C, P)*nb_vertex*nb_vertex;
+    double test3 = orientationTest(C, A, P)*nb_vertex*nb_vertex;
 
     if ((test1 >= 0) && (test2 >= 0) && (test3 >= 0)){
         // Renvoi val strictement positive si toutes les orientation sont strictement positive
@@ -508,8 +507,8 @@ double Mesh::inTriangleTest(Face face, Vertex P){
     } else {
         // On est forcément en dehors du triangle
         // On renvoi une valeur négative
-        double value = -abs(test1*test2*test3);
-        return value;
+        // double value = -abs(test1*test2*test3);
+        return -1; //value;
     };
 }
 
@@ -588,6 +587,128 @@ void Mesh::insertionTriangle(int i_P, int i_face){
     P.i_incident_face = i_ABP;
 }
 
+void Mesh::insertionInArete(int i_face1, int i_P){
+    // quand on veut inserer un point qui se trouve sur une arete
+
+    Face face1 = facesTab[i_face1];
+
+    int i_A = -1;
+    int i_B = -1;
+    int i_C = -1;
+    int i_D = -1;
+    int i_face2 = -1;
+    int i_face3 = -1;
+    int i_face4 = -1;
+    int i_face5 = -1;
+    int i_face6 = -1;
+
+    if(orientationTest(verticesTab[face1.i_vertex[0]], verticesTab[face1.i_vertex[1]], verticesTab[i_P])==0){
+        i_A = face1.i_vertex[2];
+        i_B = face1.i_vertex[0];
+        i_D = face1.i_vertex[1];
+        i_face2 = face1.adjacent_faces[2];
+        i_face6 = face1.adjacent_faces[0];
+        i_face3 = face1.adjacent_faces[1];
+    } else if (orientationTest(verticesTab[face1.i_vertex[1]], verticesTab[face1.i_vertex[2]], verticesTab[i_P])==0){
+        i_A = face1.i_vertex[0];
+        i_B = face1.i_vertex[1];
+        i_D = face1.i_vertex[2];
+        i_face2 = face1.adjacent_faces[0];
+        i_face6 = face1.adjacent_faces[1];
+        i_face3 = face1.adjacent_faces[2];
+    } else if (orientationTest(verticesTab[face1.i_vertex[2]], verticesTab[face1.i_vertex[0]], verticesTab[i_P])==0){
+        i_A = face1.i_vertex[1];
+        i_B = face1.i_vertex[2];
+        i_D = face1.i_vertex[0];
+        i_face2 = face1.adjacent_faces[1];
+        i_face6 = face1.adjacent_faces[2];
+        i_face3 = face1.adjacent_faces[0];
+    };
+
+    // Tester le cas si i_face2 = -1 ?? Pas la peine pour l'instant, on gardera un cadre plus grand
+    for (int i = 0; i<3; i++){
+        if(facesTab[i_face2].adjacent_faces[i] == i_face1){
+            i_C = facesTab[i_face2].i_vertex[i];
+            i_face4 = facesTab[i_face2].adjacent_faces[(i+1)%3];
+            i_face5 = facesTab[i_face2].adjacent_faces[(i+2)%3];
+        };
+    };
+
+
+    Vertex &A = verticesTab[i_A];
+    Vertex &B = verticesTab[i_B];
+    Vertex &C = verticesTab[i_C];
+    Vertex &D = verticesTab[i_D];
+    Vertex &P = verticesTab[i_P];
+
+    // Insérer ces triangles dans le tableau faces et supprimer l'ancien
+
+    facesTab[i_face1] = Face(i_D, i_A, i_P); // DAP
+    facesTab[i_face2] = Face(i_C, i_D, i_P); // CDP
+
+    facesTab.append(Face(i_A, i_B, i_P)); // ABP
+    facesTab.append(Face(i_B, i_C, i_P)); // BCP
+
+    int i_DAP = i_face1;
+    int i_CDP = i_face2;
+    int i_ABP = nb_faces;
+    int i_BCP = nb_faces+1;
+
+    Face &DAP = facesTab[i_DAP];
+    Face &CDP = facesTab[i_CDP];
+    Face &ABP = facesTab[i_ABP];
+    Face &BCP = facesTab[i_BCP];
+
+    // Actualiser paramètres du Mesh
+
+    nb_faces +=2;
+
+    // Ajouter les adjacences des nouveaux triangles
+
+
+
+    DAP.adjacent_faces[0] = i_ABP;
+    DAP.adjacent_faces[1] = i_CDP;
+    DAP.adjacent_faces[2] = i_face6;
+
+    CDP.adjacent_faces[0] = i_DAP;
+    CDP.adjacent_faces[1] = i_BCP;
+    CDP.adjacent_faces[2] = i_face5;
+
+    ABP.adjacent_faces[0] = i_BCP;
+    ABP.adjacent_faces[1] = i_DAP;
+    ABP.adjacent_faces[2] = i_face3;
+
+    BCP.adjacent_faces[0] = i_CDP;
+    BCP.adjacent_faces[1] = i_ABP;
+    BCP.adjacent_faces[2] = i_face4;
+
+    // Adapter les adjacences des triangles autour
+
+    for(int i=0;i<3;i++){
+        if (i_face3 >=0 && facesTab[i_face3].adjacent_faces[i] == i_face1) {
+            facesTab[i_face3].adjacent_faces[i] = i_ABP;
+        };
+        if (i_face4 >=0 && facesTab[i_face4].adjacent_faces[i] == i_face2) {
+            facesTab[i_face4].adjacent_faces[i] = i_BCP;
+        };
+        if (i_face5 >=0 && facesTab[i_face5].adjacent_faces[i] == i_face2) {
+            facesTab[i_face5].adjacent_faces[i] = i_CDP;
+        };
+        if (i_face6 >=0 && facesTab[i_face6].adjacent_faces[i] == i_face1) {
+            facesTab[i_face6].adjacent_faces[i] = i_DAP;
+        };
+    }
+
+    // Modifier les i_incident_face des Vertices
+
+    A.i_incident_face = i_ABP;
+    B.i_incident_face = i_BCP;
+    C.i_incident_face = i_CDP;
+    D.i_incident_face = i_DAP;
+    P.i_incident_face = i_ABP;
+}
+
 void Mesh::naiveInsertion(){
     // On ne prend pas en compte la dimension z
     // On part d'un maillage sans triangle, seulement des points
@@ -606,10 +727,10 @@ void Mesh::naiveInsertion(){
         if(verticesTab[i_vertex].y() > y_max){y_max = verticesTab[i_vertex].y();};
     };
 
-    x_min -= (x_max-x_min)/50;
-    x_max += (x_max-x_min)/50;
-    y_min -= (y_max-y_min)/50;
-    y_max += (y_max-y_min)/50;
+    x_min -= (x_max-x_min)/10;
+    x_max += (x_max-x_min)/10;
+    y_min -= (y_max-y_min)/10;
+    y_max += (y_max-y_min)/10;
 
     verticesTab.append(Vertex(x_min, y_min, 0)); // bas gauche
     verticesTab.append(Vertex(x_min, y_max, 0)); // haut gauche
@@ -648,10 +769,22 @@ void Mesh::naiveInsertion(){
 
     for(int i_vertex=0;i_vertex<(nb_vertex-4);i_vertex++){
         for(int i_face=0;i_face<nb_faces;i_face++){
+            //std::cout<<inTriangleTest(facesTab[i_face], verticesTab[i_vertex])<<std::endl;
             //std::cout<<"inTriangleTest : "<<inTriangleTest(facesTab[i_face], verticesTab[i_vertex])<<std::endl;
-            if (inTriangleTest(facesTab[i_face], verticesTab[i_vertex])>0){
+            if (inTriangleTest(facesTab[i_face], verticesTab[i_vertex])==0){
+                std::cout<<"!!!!!!!!!!!!!    inTriangleTest = 0   !!!!!!!!!!!!!!!! "<<std::endl;
+                std::cout<<"i_vertex :  "<<i_vertex<<std::endl;
+                std::cout<<"i_face :  "<<i_face<<std::endl;
+                insertionInArete(i_face, i_vertex);
+                //lawsonAroundVertex(i_vertex);
+            }else if (inTriangleTest(facesTab[i_face], verticesTab[i_vertex])>0){
+                //std::cout<<"inTriangleTest : "<<inTriangleTest(facesTab[i_face], verticesTab[i_vertex])<<std::endl;
+                std::cout<<"!!!!!!!!!!!!!    inTriangleTest = 0   !!!!!!!!!!!!!!!! "<<std::endl;
+                std::cout<<"i_vertex :  "<<i_vertex<<std::endl;
+                std::cout<<"i_face :  "<<i_face<<std::endl;
                 insertionTriangle(i_vertex, i_face);
-                break;
+                //lawsonAroundVertex(i_vertex);
+                //break;
             };
         };
     };
@@ -694,62 +827,44 @@ std::pair<int, int> Mesh::areteSymetrique(std::pair<int, int> face_et_vertex){
     };
 }
 
-
-
-void Mesh::lawson(){
-    QQueue<std::pair<int, int>> atraiter;// Toutes les aretes a traiter, codees par i_face, i_vertex_oppose
-    QVector<std::pair<int,int>> dejavu;// Toutes les aretes deja ajoutées a atraiter, codees par i_face, i_vertex_oppose
-    dejavu.reserve(nb_faces*3);
-    atraiter.reserve(nb_faces*3);
-
-    // 1ere phase : On remplie la queue avec toutes les aretes qui sont de Delaunay (et pas en bordure)
-    for(int i_face=0;i_face<nb_faces;i_face++){
-        // On est dans la face i_face, on va regarder les trois aretes encadrant
-        for(int i=0;i<3;i++){
-            std::pair<int, int> arete_sym = areteSymetrique({i_face, facesTab[i_face].i_vertex[i]});
-            // On ajoute si pas en bordure et pas de Delaunay et pas encore dans la liste
-            if(facesTab[i_face].adjacent_faces[i]>=0){// si on n'est pas sur une bordure
-                if(!isDelaunay(i_face, facesTab[i_face].i_vertex[i]) // et est pas de Delaunay
-                        && (dejavu.indexOf(arete_sym) <0)){ // Et le sym est pas encore apparu
-
-                    atraiter.enqueue({i_face,facesTab[i_face].i_vertex[i]});
-                    dejavu.append({i_face, facesTab[i_face].i_vertex[i]});
-                };
-            };
-        };
+void Mesh::lawsonAroundVertex(int i_P){
+    // On recupere les trois ou quatre aretes autour du P dans une file
+    QList<std::pair<int, int>> atraiter;
+    for(int i_face = 0;i_face<nb_faces;i_face++){
+        for(int i = 0;i<3;i++){
+            if(facesTab[i_face].i_vertex[i] == i_P){
+                atraiter.append({i_face, i_P});
+            }
+        }
     };
-
-    //std::cout<<dejavu.size()<<std::endl;
-    std::cout<<dejavu[2].first<<", "<<dejavu[2].second<<std::endl;
-
-    int count = 0;
-    // 2e phase : dans la boucle while, on traite l'entete de la queue, on ajoute les nouvelles aretes a traiter, et on recommence
-    while (!atraiter.isEmpty() and count < 1000000){
-        std::cout<<count<<std::endl;
-        count+=1;
-        std::pair<int, int> face_et_vertex = atraiter.dequeue();
+    std::cout<<"a_traiter_size_ini :"<<atraiter.size()<<std::endl;
+    // On lance la boucle while et on remplie et traite la file
+    while(!atraiter.isEmpty()){
+        std::cout<<"a_traiter : :"<<atraiter.size()<<std::endl;
+        std::pair<int, int> face_et_vertex = atraiter.takeFirst();
         int i_face = face_et_vertex.first;
         int i_vertex = face_et_vertex.second;
-        if (!areteEnBordure(i_face, i_vertex) && !isDelaunay(i_face, i_vertex)){
-            //std::cout<<"testest_debut"<<std::endl;
-            QQueue<std::pair<int, int>> nouvelle_queue = flipEdge(i_face, i_vertex); // On fait le flip et récupère les arete à retester
-            //std::cout<<"testest_fin"<<std::endl;
-            while(!nouvelle_queue.isEmpty()){
-                std::pair<int, int> face_et_vertex_quadrilatere = nouvelle_queue.dequeue();
-                int i_face_quadrilatere = face_et_vertex.first;
-                int i_vertex_quadrilatere = face_et_vertex.second;
 
-                std::pair<int, int> arete_sym_quadrilatere = areteSymetrique({i_face_quadrilatere, i_vertex_quadrilatere});
+        if(!areteEnBordure(i_face, i_vertex)){
+            if(!isDelaunay(i_face, i_vertex)){
+                QList<std::pair<int, int>> nouvelle_queue = flipEdge(i_face, i_vertex); // On fait le flip et récupère les arete à retester
+                while(!nouvelle_queue.isEmpty()){
 
-                if(!areteEnBordure(i_face_quadrilatere, i_vertex_quadrilatere)
-                        && !isDelaunay(i_face_quadrilatere, i_vertex_quadrilatere)){
+                    std::pair<int, int> face_et_vertex_quadrilatere = nouvelle_queue.takeFirst();
+                    int i_face_quadrilatere = face_et_vertex.first;
+                    int i_vertex_quadrilatere = face_et_vertex.second;
 
-                    atraiter.enqueue(face_et_vertex_quadrilatere); // On rajoute les aretes du quadrilatère autour du flip qui ne sont pas de Delaunay et ne sont pas au bord
+                    if(!areteEnBordure(i_face_quadrilatere, i_vertex_quadrilatere)){
+                        if(!isDelaunay(i_face_quadrilatere, i_vertex_quadrilatere)){
+                            atraiter.append(face_et_vertex_quadrilatere);
+                        };
+                    };
                 };
             };
         };
-    };
+    }
 }
+
 
 // ---------------Face------------------
 Face::Face()
