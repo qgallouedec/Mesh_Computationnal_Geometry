@@ -96,7 +96,9 @@ void Mesh::parseFile(const char file_name[])
     for(int i_vertex = 0; i_vertex < nb_vertex; i_vertex++)
     {
         fscanf(pFile, "%lf %lf %lf\n", &x, &y, &z); // Stockage de la ligne lue
-        verticesTab.push_back(Vertex(x,y,z)); // Ajout du point dans le vecteur verticesTab
+
+        // !!!!! A MOFIFIER !!!!!
+        verticesTab.push_back(Vertex(x-0.5,y-0.5,0)); // Ajout du point dans le vecteur verticesTab
     }
 
     int n_face, i_vertex0, i_vertex1, i_vertex2;
@@ -497,9 +499,9 @@ double Mesh::inTriangleTest(Face face, Vertex P){
     Vertex B = verticesTab[face.i_vertex[1]];
     Vertex C = verticesTab[face.i_vertex[2]];
 
-    double test1 = orientationTest(A, B, P)*nb_vertex*nb_vertex;
-    double test2 = orientationTest(B, C, P)*nb_vertex*nb_vertex;
-    double test3 = orientationTest(C, A, P)*nb_vertex*nb_vertex;
+    double test1 = orientationTest(A, B, P)*nb_vertex;
+    double test2 = orientationTest(B, C, P)*nb_vertex;
+    double test3 = orientationTest(C, A, P)*nb_vertex;
 
     if ((test1 >= 0) && (test2 >= 0) && (test3 >= 0)){
         // Renvoi val strictement positive si toutes les orientation sont strictement positive
@@ -732,10 +734,10 @@ void Mesh::naiveInsertion(){
         if(verticesTab[i_vertex].y() > y_max){y_max = verticesTab[i_vertex].y();};
     };
 
-    x_min -= (x_max-x_min)/50;
-    x_max += (x_max-x_min)/50;
-    y_min -= (y_max-y_min)/50;
-    y_max += (y_max-y_min)/50;
+    x_min -= (x_max-x_min)/10;
+    x_max += (x_max-x_min)/10;
+    y_min -= (y_max-y_min)/10;
+    y_max += (y_max-y_min)/10;
 
     verticesTab.append(Vertex(x_min, y_min, 0)); // bas gauche
     verticesTab.append(Vertex(x_min, y_max, 0)); // haut gauche
@@ -773,9 +775,12 @@ void Mesh::naiveInsertion(){
     std::cout<<"------ok------"<<std::endl;
 
     for(int i_vertex=0;i_vertex<(nb_vertex-4);i_vertex++){
+        std::cout<<"i_vertex : "<< i_vertex<<std::endl;
         for(int i_face=0;i_face<nb_faces;i_face++){
-            //std::cout<<"inTriangleTest : "<<inTriangleTest(facesTab[i_face], verticesTab[i_vertex])<<std::endl;
+
+
             if (inTriangleTest(facesTab[i_face], verticesTab[i_vertex])>0){
+                std::cout<<"inTriangleTest : "<<inTriangleTest(facesTab[i_face], verticesTab[i_vertex])<<std::endl;
                 insertionTriangle(i_vertex, i_face);
                 break;
             };
@@ -842,23 +847,24 @@ void Mesh::naiveInsertionAndLawson(){
     triangle_hd.adjacent_faces[2] = -1;
 
     for(int i_vertex=0;i_vertex<(nb_vertex-4);i_vertex++){
+//        std::cout<<"i_vertex :  "<<i_vertex<<std::endl;
         for(int i_face=0;i_face<nb_faces;i_face++){
             //std::cout<<inTriangleTest(facesTab[i_face], verticesTab[i_vertex])<<std::endl;
-            //std::cout<<"inTriangleTest : "<<inTriangleTest(facesTab[i_face], verticesTab[i_vertex])<<std::endl;
             if (inTriangleTest(facesTab[i_face], verticesTab[i_vertex])==0){
-                std::cout<<"!!!!!!!!!!!!!    inTriangleTest = 0   !!!!!!!!!!!!!!!! "<<std::endl;
-                std::cout<<"i_vertex :  "<<i_vertex<<std::endl;
-                std::cout<<"i_face :  "<<i_face<<std::endl;
+                std::cout<<"inTriangleTest : "<<inTriangleTest(facesTab[i_face], verticesTab[i_vertex])<<std::endl;
+                //std::cout<<"!!!!!!!!!!!!!    inTriangleTest = 0   !!!!!!!!!!!!!!!! "<<std::endl;
+                //std::cout<<"i_face :  "<<i_face<<std::endl;
                 insertionInArete(i_face, i_vertex); // pb ici probablement
                 //lawsonAroundVertex(i_vertex);
+                break;
             }else if (inTriangleTest(facesTab[i_face], verticesTab[i_vertex])>0){
+//                std::cout<<"inTriangleTest : "<<inTriangleTest(facesTab[i_face], verticesTab[i_vertex])<<std::endl;
                 //std::cout<<"inTriangleTest : "<<inTriangleTest(facesTab[i_face], verticesTab[i_vertex])<<std::endl;
-                std::cout<<"!!!!!!!!!!!!!    inTriangleTest = 0   !!!!!!!!!!!!!!!! "<<std::endl;
-                std::cout<<"i_vertex :  "<<i_vertex<<std::endl;
-                std::cout<<"i_face :  "<<i_face<<std::endl;
+                //std::cout<<"!!!!!!!!!!!!!    inTriangleTest = 0   !!!!!!!!!!!!!!!! "<<std::endl;
+                //std::cout<<"i_face :  "<<i_face<<std::endl;
                 insertionTriangle(i_vertex, i_face);
                 //lawsonAroundVertex(i_vertex);
-                //break;
+                break;
             };
         };
     };
