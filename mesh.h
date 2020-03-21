@@ -80,11 +80,10 @@ public:
     Circulator_on_faces incident_faces(int i_vertex); // returning a Circulator_on_faces positioned on one of the incident faces at vertex v.
     Circulator_on_vertices adjacent_vertices(int i_vertex);
     void computeLaplacian();
-    void test();
 
     double vertexInCircumscribingCircle(Face face, Vertex P);
     bool isDelaunay(int i_face1, int i_vertex_oppose_1);
-    QQueue<std::pair<int, int>> flipEdge(int i_face1, int i_vertex_oppose_1_initial);
+    QList<std::pair<int, int>> flipEdge(int i_face1, int i_vertex_oppose_1_initial);
     double orientationTest(Vertex A, Vertex B, Vertex C);
     double inTriangleTest(Face face, Vertex P);
     void insertionTriangle(int i_P, int i_face);
