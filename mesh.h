@@ -89,9 +89,10 @@ public:
     void insertionTriangle(int i_P, int i_face);
     void insertionInArete(int i_face1, int i_P);
     void naiveInsertion();
-    void naiveInsertionAndLawson();
+
     bool areteEnBordure(int i_face, int i_vertex);
     void lawsonAroundVertex(int i_P);
+    void naiveInsertionAndLawson();
 };
 
 class Circulator_on_faces

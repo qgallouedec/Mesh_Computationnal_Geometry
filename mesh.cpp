@@ -3,17 +3,26 @@
 #include <iostream>
 #include <stdio.h>
 #include <string>
-#include <QQueue>
 
-// ------------Functions-----------
+
+// ----------------------------------------------
+// -------------------Functions------------------
+// ----------------------------------------------
+
+
 double cotan(const Vertex vertex1, const Vertex vertex2)
 {
     double cosalpha = (vertex1*vertex2)/(vertex1.getNorm()*vertex2.getNorm());
     return cosalpha/sqrt(1-cosalpha*cosalpha);
 }
 
+
+//-----------------------------------------------
 // --------------------Point---------------------
-// Constructeur
+// ----------------------------------------------
+
+
+// Constructors
 Vertex::Vertex() // Les constructeur par défaut
 {
     _x = 0;
@@ -44,7 +53,7 @@ double Vertex::z() const
     return _z;
 }
 
-// other functions
+// Other methods
 Vertex Vertex::getNormalized() const
 {
     double norm = getNorm();
@@ -64,7 +73,12 @@ Vertex Vertex::cross(const Vertex &other_vertex) const
     return Vertex(result_x, result_y, result_z);
 }
 
-// ---------------Face------------------
+
+// ----------------------------------------------
+// ------------------------Face------------------
+// ----------------------------------------------
+
+// Constructors
 Face::Face()
 {
     i_vertex[0] = 0;
@@ -80,14 +94,17 @@ Face::Face(int i_vertex0_, int i_vertex1_, int i_vertex2_)
 }
 
 
-
+// ----------------------------------------------
 // ----------------------Mesh--------------------
-// constructor
+// ----------------------------------------------
+
+
+// Constructors
 Mesh::Mesh()
 {}
 
-// other methods
-void Mesh::parseFile(const char file_name[])
+// Other methods
+void Mesh::parseFile(const char file_name[]) // Enregistre les données (centrées) du fichier off dans verticesTab et facesTab
 {
     // Lecture du fichier, et stockage dans verticesTab et facesTab
     FILE * pFile;
@@ -110,12 +127,43 @@ void Mesh::parseFile(const char file_name[])
     facesTab.reserve(nb_faces);
 
     double x, y, z;
-    for(int i_vertex = 0; i_vertex < nb_vertex; i_vertex++)
+    double x_min, x_max, y_min, y_max, z_min, z_max;
+
+    // 1er point :
+    fscanf(pFile, "%lf %lf %lf\n", &x, &y, &z); // Stockage de la premiere ligne
+    verticesTab.push_back(Vertex(x,y,z)); // Ajout du point dans le vecteur verticesTab
+
+    x_min = x;
+    x_max = x;
+    y_min = y;
+    y_max = y;
+    z_min = z;
+    z_max = z;
+
+    // Tous les autres points :
+
+    for(int i_vertex = 1; i_vertex < nb_vertex; i_vertex++)
     {
         fscanf(pFile, "%lf %lf %lf\n", &x, &y, &z); // Stockage de la ligne lue
+        verticesTab.push_back(Vertex(x,y,z)); // Ajout du point dans le vecteur verticesTab
 
-        // !!!!! A MOFIFIER !!!!!
-        verticesTab.push_back(Vertex(x-0.5,y-0.5,0)); // Ajout du point dans le vecteur verticesTab
+        if(x < x_min){x_min = x;};
+        if(x > x_max){x_max = x;};
+        if(y < y_min){y_min = y;};
+        if(y > y_max){y_max = y;};
+        if(z < z_min){z_min = z;};
+        if(z > z_max){z_max = z;};
+    }
+
+    // On remet à jour la liste en centrant cette fois les coordonnees
+    double x_middle = (x_max + x_min)/2;
+    double y_middle = (y_max + y_min)/2;
+    double z_middle = (z_max + z_min)/2;
+
+    for(int i_vertex = 0; i_vertex < nb_vertex; i_vertex++)
+    {
+        Vertex vertex = verticesTab[i_vertex];
+        verticesTab[i_vertex] = Vertex(vertex.x()-x_middle, vertex.y()-y_middle, vertex.z()-z_middle); // Ajout du point dans le vecteur verticesTab
     }
 
     int n_face, i_vertex0, i_vertex1, i_vertex2;
@@ -128,7 +176,7 @@ void Mesh::parseFile(const char file_name[])
     std::cout << "end of reading" << std::endl;
 }
 
-void Mesh::sew()
+void Mesh::sew() // Raccorde les i_incident_face des vertex et les 3 adjacent_faces des faces du maillage
 {
     // vert_done est un liste de boolean. Si vert_done[5] == true, ça signifie que le vertex 5 à été traité
     std::cout << "begin sewing"<< std::endl;
@@ -274,11 +322,10 @@ void Mesh::computeLaplacian()
     std::cout << "laplacian computed" <<std::endl;
 }
 
-double Mesh::vertexInCircumscribingCircle(Face face, Vertex P)
+double Mesh::vertexInCircumscribingCircle(Face face, Vertex P) // Renvoi valeur >0 si P est dans le cercle circ de la face
 {
     // On analyse seulement les dimensions x, y
     // On regarde en projetant sur le paraboloïde z = x*x + y*y
-
 
     Vertex A = verticesTab[face.i_vertex[0]];
     Vertex B = verticesTab[face.i_vertex[1]];
@@ -298,11 +345,13 @@ double Mesh::vertexInCircumscribingCircle(Face face, Vertex P)
 
     // si pdtScal < 0, alors P en dehors du cercle circonscrit
     // si pdtScal > 0, alors P en dans le cercle circonscrit
+    // si pdtScal = 0, alors P sur le cercle circonscrit
+
     return pdtScal;
 
 }
 
-bool Mesh::isDelaunay(int i_face1, int i_vertex_oppose_1)
+bool Mesh::isDelaunay(int i_face1, int i_vertex_oppose_1) // Dis si l'arete de face1 et a l'oppose du vertex_oppose_1 est de Delaunay
 {
 
     Face face1 = facesTab[i_face1];
@@ -330,11 +379,11 @@ bool Mesh::isDelaunay(int i_face1, int i_vertex_oppose_1)
     return ((test1 <= 0) && (test2 <= 0));
 }
 
-QList<std::pair<int, int>> Mesh::flipEdge(int i_face1, int i_vertex_oppose_1_initial){
-    // Cette fonction fait le flip de l'edge en question
-    // (Il faudra verifier avant de l'utiliser qu'on ne se trouve pas sur un bord)
-    // Et elle renvoi les 4 aretes encadrant l'arete flipée dans une queue de taille 4
-    // (Pour faciliter l'algorithme de Lawson)
+QList<std::pair<int, int>> Mesh::flipEdge(int i_face1, int i_vertex_oppose_1_initial) // Voir explication ci dessous
+{
+    // Cette fonction fait le flip de l'arete en question
+    // On suppose pour cela que l'arete ne se trouve pas sur un bord)
+    // Elle renvoie les 2 aretes qui encadrent l'arete flippée, et n'étant pas dans le meme triangle initial que vertex_oppose_1_initial
 
     // Initialisation des valeurs
     Face &face1 = facesTab[i_face1];
@@ -392,8 +441,6 @@ QList<std::pair<int, int>> Mesh::flipEdge(int i_face1, int i_vertex_oppose_1_ini
 
     };
 
-    std::cout<<i_face3<<", "<<i_face4<<", "<<i_face5<<", "<<i_face6<<", "<<std::endl;
-
     // Actualisation des donnees apres le flip
 
     // Faces 1 et 2
@@ -440,9 +487,8 @@ QList<std::pair<int, int>> Mesh::flipEdge(int i_face1, int i_vertex_oppose_1_ini
     return aretes_quadrilatere;
 }
 
-double Mesh::orientationTest(Vertex A, Vertex B, Vertex C){
-
-    // Positif si orientes dans le sens trigo
+double Mesh::orientationTest(Vertex A, Vertex B, Vertex C) // Positif si A B Corientes dans le sens trigo, nul si alignes, negatif sinon
+{
     // On travaille dans le plan z = 0
 
     Vertex AB = B - A;
@@ -456,9 +502,8 @@ double Mesh::orientationTest(Vertex A, Vertex B, Vertex C){
     return value;
 }
 
-double Mesh::inTriangleTest(Face face, Vertex P){
-
-    // Positif si on est dans le triangle, 0 sur les bords, negatif si à l'exterieur
+double Mesh::inTriangleTest(Face face, Vertex P) // Positif si on est dans le triangle, 0 sur les bords, negatif si à l'exterieur
+{
     // On travaille dans le plan z = 0
 
     Vertex A = verticesTab[face.i_vertex[0]];
@@ -482,7 +527,8 @@ double Mesh::inTriangleTest(Face face, Vertex P){
     };
 }
 
-void Mesh::insertionTriangle(int i_P, int i_face){
+void Mesh::insertionTriangle(int i_P, int i_face) // Insere le point P dans la face
+{
     Face old_face = facesTab[i_face];
 
     // Creer nouveaux triangles
@@ -557,9 +603,8 @@ void Mesh::insertionTriangle(int i_P, int i_face){
     P.i_incident_face = i_ABP;
 }
 
-void Mesh::insertionInArete(int i_face1, int i_P){
-    // quand on veut inserer un point qui se trouve sur une arete
-
+void Mesh::insertionInArete(int i_face1, int i_P) // Insere que point P qui est sur l'arete de face1
+{
     Face face1 = facesTab[i_face1];
 
     int i_A = -1;
@@ -595,7 +640,6 @@ void Mesh::insertionInArete(int i_face1, int i_P){
         i_face3 = face1.adjacent_faces[0];
     };
 
-    // Tester le cas si i_face2 = -1 ?? Pas la peine pour l'instant, on gardera un cadre plus grand
     for (int i = 0; i<3; i++){
         if(facesTab[i_face2].adjacent_faces[i] == i_face1){
             i_C = facesTab[i_face2].i_vertex[i];
@@ -676,11 +720,8 @@ void Mesh::insertionInArete(int i_face1, int i_P){
     P.i_incident_face = i_ABP;
 }
 
-void Mesh::naiveInsertion(){
-    // MARCHE (sauf si in point à inserer se retrouve sur une arete, à finir
-
-    // On creer un maillage naif à partir de points en inserant recursivement
-
+void Mesh::naiveInsertion() // On creer un maillage naif à partir de points en inserant recursivement
+{
     // On ne prend pas en compte la dimension z
     // On part d'un maillage sans triangle, seulement des points
 
@@ -753,8 +794,56 @@ void Mesh::naiveInsertion(){
     };
 }
 
-void Mesh::naiveInsertionAndLawson(){
-    // Obj : on insere les points au fur et à mesure (comme naf insertion) sauf qu'à chaque fois on insere en faiant lawson local
+bool Mesh::areteEnBordure(int i_face, int i_vertex)// Renvoie True si, de l'autre coté de l'arete, il n'y a rien (indice de face negatif)
+{
+    if(facesTab[i_face].i_vertex[0] == i_vertex){
+        return facesTab[i_face].adjacent_faces[0] <0;
+    }else if(facesTab[i_face].i_vertex[1] == i_vertex){
+        return facesTab[i_face].adjacent_faces[1] <0;
+    }else if(facesTab[i_face].i_vertex[2] == i_vertex){
+        return facesTab[i_face].adjacent_faces[2] <0;
+    }else{return true;};
+}
+
+void Mesh::lawsonAroundVertex(int i_P) // Après insertion de P dans face, flips autour de P jusqu'à ce que le triangle soit de Delaunay
+{
+    // On part d'un vertex i_P (dans i_face) qui vient d'être insere, et on fait des flips recursifs pour qu'a la fin il soit insere et tout soit Delaunay
+    // On recupere les trois ou quatre aretes autour du P dans une file
+    QList<std::pair<int, int>> atraiter;
+    for(int i_face=0; i_face<nb_faces;i_face++){
+        for(int i=0; i<3; i++){
+            if(facesTab[i_face].i_vertex[i] == i_P){
+                atraiter.append({i_face, i_P});
+            }
+        }
+    }
+    // On lance la boucle while et on remplie et traite la file
+    while(!atraiter.isEmpty()){
+        std::pair<int, int> face_et_vertex = atraiter.takeFirst();
+        int i_face = face_et_vertex.first;
+        int i_vertex = face_et_vertex.second;
+
+        if(!areteEnBordure(i_face, i_vertex)){
+            if(!isDelaunay(i_face, i_vertex)){
+                QList<std::pair<int, int>> nouvelle_queue = flipEdge(i_face, i_vertex); // On fait le flip et récupère les arete à retester
+                while(!nouvelle_queue.isEmpty()){
+
+                    std::pair<int, int> face_et_vertex_quadrilatere = nouvelle_queue.takeFirst();
+                    int i_face_quadrilatere = face_et_vertex_quadrilatere.first;
+                    int i_vertex_quadrilatere = face_et_vertex_quadrilatere.second;
+                    if(!areteEnBordure(i_face_quadrilatere, i_vertex_quadrilatere)){
+                        if(!isDelaunay(i_face_quadrilatere, i_vertex_quadrilatere)){
+                            atraiter.append(face_et_vertex_quadrilatere);
+                        };
+                    };
+                };
+            };
+        };
+    };
+}
+
+void Mesh::naiveInsertionAndLawson() // Semblable a naiveInsertion, en assurant Delaunay après chaque insertion
+{
     // On ne prend pas en compte la dimension z
     // On part d'un maillage sans triangle, seulement des points
 
@@ -825,54 +914,12 @@ void Mesh::naiveInsertionAndLawson(){
     };
 }
 
-bool Mesh::areteEnBordure(int i_face, int i_vertex){
-    // Renvoie True si, de l'autre coté de l'arete, il n'y a rien (indice de face negatif)
-    if(facesTab[i_face].i_vertex[0] == i_vertex){
-        return facesTab[i_face].adjacent_faces[0] <0;
-    }else if(facesTab[i_face].i_vertex[1] == i_vertex){
-        return facesTab[i_face].adjacent_faces[1] <0;
-    }else if(facesTab[i_face].i_vertex[2] == i_vertex){
-        return facesTab[i_face].adjacent_faces[2] <0;
-    }else{return true;};
-}
 
-void Mesh::lawsonAroundVertex(int i_P){
-    // On part d'un vertex i_P (dans i_face) qui vient d'être insere, et on fait des flips recursifs pour qu'a la fin il soit insere et tout soit Delaunay
-    // On recupere les trois ou quatre aretes autour du P dans une file
-    QList<std::pair<int, int>> atraiter;
-    for(int i_face=0; i_face<nb_faces;i_face++){
-        for(int i=0; i<3; i++){
-            if(facesTab[i_face].i_vertex[i] == i_P){
-                atraiter.append({i_face, i_P});
-            }
-        }
-    }
-    // On lance la boucle while et on remplie et traite la file
-    while(!atraiter.isEmpty()){
-        int i_face = face_et_vertex.first;
-        int i_vertex = face_et_vertex.second;
-
-        if(!areteEnBordure(i_face, i_vertex)){
-            if(!isDelaunay(i_face, i_vertex)){
-                QList<std::pair<int, int>> nouvelle_queue = flipEdge(i_face, i_vertex); // On fait le flip et récupère les arete à retester
-                while(!nouvelle_queue.isEmpty()){
-
-                    std::pair<int, int> face_et_vertex_quadrilatere = nouvelle_queue.takeFirst();
-                    int i_face_quadrilatere = face_et_vertex_quadrilatere.first;
-                    int i_vertex_quadrilatere = face_et_vertex_quadrilatere.second;
-                    if(!areteEnBordure(i_face_quadrilatere, i_vertex_quadrilatere)){
-                        if(!isDelaunay(i_face_quadrilatere, i_vertex_quadrilatere)){
-                            atraiter.append(face_et_vertex_quadrilatere);
-                        };
-                    };
-                };
-            };
-        };
-    };
-}
+// ----------------------------------------------
+// --------Useful function for circulator--------
+// ----------------------------------------------
 
 
-// ---------------Useful function for circulator---------------
 int find_i_vertex_in_face(Face *face, int i_vertex)
 {
     int i_vertex_in_face = 0;
@@ -883,7 +930,12 @@ int find_i_vertex_in_face(Face *face, int i_vertex)
     return i_vertex_in_face;
 }
 
-// ------------Circulator on faces--------------------
+
+// ----------------------------------------------
+// ------------Circulator on faces---------------
+// ----------------------------------------------
+
+
 Circulator_on_faces::Circulator_on_faces(){}
 
 Circulator_on_faces::Circulator_on_faces(Mesh *p_mesh_, int i_vertex_)
@@ -922,7 +974,12 @@ bool Circulator_on_faces::operator!=(const Circulator_on_faces other_circulator_
     return i_face != other_circulator_on_faces.i_face;
 }
 
-// -------------Circulator on vertices------------
+
+// ----------------------------------------------
+// -------------Circulator on vertices-----------
+// ----------------------------------------------
+
+
 Circulator_on_vertices::Circulator_on_vertices(Mesh *p_mesh_, int i_vertex_)
 {
     p_mesh = p_mesh_;
