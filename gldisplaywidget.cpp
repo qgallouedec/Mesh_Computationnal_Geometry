@@ -41,25 +41,29 @@ void GLDisplayWidget::initializeGL()
     glEnable(GL_LIGHT0);
     glEnable(GL_COLOR_MATERIAL);
 
+
     // Construction of the mesh before it is displayed
-//    char path_to_off_files[512]="/path/to/directory/Mesh_Computationnal_Geometry/off_files/";
+    //char path_to_off_files[512]="/path/to/directory/Mesh_Computationnal_Geometry/off_files/";
     //char off_filename[64]="queen.off";
-    char off_filename[64]="franketest.off";
+    //char off_filename[64]="franketest.off";
 
     //char path_to_off_files[512]="/Users/quentingallouedec/GitHub/Mesh_Computationnal_Geometry/off_files/";
-    char path_to_off_files[512]="/Users/William/Desktop/ECL/SCOLAIRE/3A/OPTION ET MOS/CMGIG/Fichiers terrains OFF/";
+    //char path_to_off_files[512]="/Users/William/Desktop/ECL/SCOLAIRE/3A/OPTION ET MOS/CMGIG/Fichiers terrains OFF/";
 
-    char path_to_off_file[512]="";
-    strcat (path_to_off_file, path_to_off_files);
-    strcat (path_to_off_file, off_filename);
-    _mesh.parseFile(path_to_off_file);
-    //_mesh.parseFile("/Users/William/Desktop/ECL/SCOLAIRE/3A/OPTION ET MOS/CMGIG/Fichiers terrains OFF/franketest.off");
+    //char path_to_off_file[512]="";
+    //strcat (path_to_off_file, path_to_off_files);
+    //strcat (path_to_off_file, off_filename);
+    //_mesh.parseFile(path_to_off_file);
+
+    // Construction of the mesh before it is displayed
+    _mesh.parseFile("/Users/William/Desktop/ECL/SCOLAIRE/3A/OPTION ET MOS/CMGIG/Fichiers terrains OFF/franketest.off");
+     //_mesh.parseFile("/Users/quentingallouedec/GitHub/Mesh_Computationnal_Geometry/off_files/cube.off");
     _mesh.sew();
 
     //_mesh.computeLaplacian();
     _mesh.naiveInsertion();
-    //_mesh.naiveInsertionAndLawson();
 }
+
 
 void GLDisplayWidget::paintGL(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
