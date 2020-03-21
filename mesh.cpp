@@ -710,8 +710,11 @@ void Mesh::insertionInArete(int i_face1, int i_P){
     P.i_incident_face = i_ABP;
 }
 
-
 void Mesh::naiveInsertion(){
+    // MARCHE (sauf si in point à inserer se retrouve sur une arete, à finir
+
+    // On creer un maillage naif à partir de points en inserant recursivement
+
     // On ne prend pas en compte la dimension z
     // On part d'un maillage sans triangle, seulement des points
 
@@ -776,11 +779,13 @@ void Mesh::naiveInsertion(){
                 insertionTriangle(i_vertex, i_face);
                 break;
             };
+            // Il manque le cas inTriangleTest == 0 (ie sur une arete; cf insertion arete qui marche pas (?) pr le moment)
         };
     };
 }
 
 void Mesh::naiveInsertionAndLawson(){
+    // Obj : on insere les points au fur et à mesure (comme naf insertion) sauf qu'à chaque fois on insere en faiant lawson local
     // On ne prend pas en compte la dimension z
     // On part d'un maillage sans triangle, seulement des points
 
@@ -844,7 +849,7 @@ void Mesh::naiveInsertionAndLawson(){
                 std::cout<<"!!!!!!!!!!!!!    inTriangleTest = 0   !!!!!!!!!!!!!!!! "<<std::endl;
                 std::cout<<"i_vertex :  "<<i_vertex<<std::endl;
                 std::cout<<"i_face :  "<<i_face<<std::endl;
-                insertionInArete(i_face, i_vertex);
+                insertionInArete(i_face, i_vertex); // pb ici probablement
                 //lawsonAroundVertex(i_vertex);
             }else if (inTriangleTest(facesTab[i_face], verticesTab[i_vertex])>0){
                 //std::cout<<"inTriangleTest : "<<inTriangleTest(facesTab[i_face], verticesTab[i_vertex])<<std::endl;
@@ -871,6 +876,7 @@ bool Mesh::areteEnBordure(int i_face, int i_vertex){
 }
 
 void Mesh::lawsonAroundVertex(int i_P){
+    // On part d'un vertex qui vient d'être insere, et on fait des flips recursifs pour qu'a la fin il soit insere et tout soit Delaunay
     // On recupere les trois ou quatre aretes autour du P dans une file
     QList<std::pair<int, int>> atraiter;
     for(int i_face = 0;i_face<nb_faces;i_face++){

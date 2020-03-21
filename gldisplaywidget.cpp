@@ -62,6 +62,7 @@ void GLDisplayWidget::initializeGL()
 
     //_mesh.computeLaplacian();
     _mesh.naiveInsertion();
+    //_mesh.naiveInsertionAndLawson();
 }
 
 
