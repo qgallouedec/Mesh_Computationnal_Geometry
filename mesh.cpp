@@ -739,10 +739,10 @@ void Mesh::naiveInsertion() // On creer un maillage naif à partir de points en 
         if(verticesTab[i_vertex].y() > y_max){y_max = verticesTab[i_vertex].y();};
     };
 
-    x_min -= (x_max-x_min)/10;
-    x_max += (x_max-x_min)/10;
-    y_min -= (y_max-y_min)/10;
-    y_max += (y_max-y_min)/10;
+    x_min -= (x_max-x_min)/20;
+    x_max += (x_max-x_min)/20;
+    y_min -= (y_max-y_min)/20;
+    y_max += (y_max-y_min)/20;
 
     verticesTab.append(Vertex(x_min, y_min, 0)); // bas gauche
     verticesTab.append(Vertex(x_min, y_max, 0)); // haut gauche
@@ -861,10 +861,10 @@ void Mesh::naiveInsertionAndLawson() // Semblable a naiveInsertion, en assurant 
         if(verticesTab[i_vertex].y() > y_max){y_max = verticesTab[i_vertex].y();};
     };
 
-    double x_min2 = x_min - (x_max-x_min)/10;
-    double x_max2 = x_max + (x_max-x_min)/10;
-    double y_min2 = y_min - (y_max-y_min)/10;
-    double y_max2 = y_max + (y_max-y_min)/10;
+    double x_min2 = x_min - (x_max-x_min)/20;
+    double x_max2 = x_max + (x_max-x_min)/20;
+    double y_min2 = y_min - (y_max-y_min)/20;
+    double y_max2 = y_max + (y_max-y_min)/20;
 
     verticesTab.append(Vertex(x_min2, y_min2, 0)); // bas gauche
     verticesTab.append(Vertex(x_min2, y_max2, 0)); // haut gauche
