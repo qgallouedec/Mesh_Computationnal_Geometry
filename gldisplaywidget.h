@@ -12,20 +12,15 @@ public:
     explicit GLDisplayWidget(QWidget *parent = 0);
 
     void initializeGL(); // The scene may be initialized in this function since the mesh is a data member...
-    void paintGL(); // Display the scene Gl
+    void paintGL();      // Display the scene Gl
     void resizeGL(int width, int height);
     Mesh _mesh; // The object to be displayed, may be replaced by a scene if there are several objects....
 
-    bool show_vertecis;
-    bool show_edges;
-    bool show_faces;
-    bool show_laplacian;
-    double coef_laplacian;
-
-    void drawVertices();
-    void drawEdges();
-    void drawFaces();
-    void drawLaplacian();
+    bool show_vertecis;    // A boolean value that determine if the vertices are displayed
+    bool show_edges;       // Same for edges
+    bool show_faces;       // Same for faces
+    bool show_laplacian;   // Same for Laplacian
+    double coef_laplacian; // The higher this value, the bigger the Laplacian appears.
 
 protected:
     // Mouse Management
@@ -33,11 +28,15 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     void wheelEvent(QWheelEvent *event);
 
-private:
+    void drawVertices();  // Display vertices of _mesh when appealed
+    void drawEdges();     // Same for edges
+    void drawFaces();     // Same for faces
+    void drawLaplacian(); // Same for Laplacian
 
-    QTimer _timer; // To update the scene
-    float _X, _Y ,_Z; // Translation
-    float _angle; // Rotation
+private:
+    QTimer _timer;    // To update the scene
+    float _X, _Y, _Z; // Translation
+    float _angle;     // Rotation
 
     QPoint _lastPosMouse; // To keep the last position of the mouse
 };
