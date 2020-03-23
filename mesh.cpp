@@ -158,9 +158,9 @@ Mesh::Mesh()
 }
 
 /**
- * Parse an off file and store the data into verticesTab and facesTab
+ * Parse an off file and store the data into verticesTab and facesTab.
  * 
- * @param file_name the path of the file
+ * @param file_name the path of the file.
  */
 void Mesh::parseFile(const char file_name[])
 {
@@ -267,7 +267,7 @@ void Mesh::parseFile(const char file_name[])
 /**
  * Connects the index of one adjacent face for every vertices of the mesh.
  * Connects the 3 adjacent faces for every faces of the mesh.
- */ 
+ */
 void Mesh::sew()
 {
     std::cout << "begin sewing" << std::endl;
@@ -336,7 +336,6 @@ void Mesh::sew()
     }
     std::cout << "end sewing" << std::endl;
 }
-
 
 Vertex *Mesh::vertices_begin()
 {
@@ -418,7 +417,16 @@ void Mesh::computeLaplacian()
     std::cout << "laplacian computed" << std::endl;
 }
 
-double Mesh::vertexInCircumscribingCircle(Face face, Vertex P) // Renvoi valeur >0 si P est dans le cercle circ de la face
+/**
+ * Tests if a vertex is within the circumscribed circle of the face.
+ * 
+ * @param face for the test.
+ * @param P the vertex for which we want to know if it's in the circumscribed circle.
+ * @return double = 0 if P is on the circumscribed circle.
+ *                > 0 if P is inside the circumscribed circle.
+ *                < 0 if P is outside the circumscribed circle.
+ */
+double Mesh::vertexInCircumscribingCircle(Face face, Vertex P)
 {
     // On analyse seulement les dimensions x, y
     // On regarde en projetant sur le paraboloïde z = x*x + y*y
@@ -439,14 +447,17 @@ double Mesh::vertexInCircumscribingCircle(Face face, Vertex P) // Renvoi valeur 
     Vertex pdtVect = AB_hyper.cross(AC_hyper);
     double pdtScal = -(pdtVect * AP_hyper);
 
-    // si pdtScal < 0, alors P en dehors du cercle circonscrit
-    // si pdtScal > 0, alors P en dans le cercle circonscrit
-    // si pdtScal = 0, alors P sur le cercle circonscrit
-
     return pdtScal;
 }
 
-bool Mesh::isDelaunay(int i_face1, int i_vertex_oppose_1) // Dis si l'arete de face1 et a l'oppose du vertex_oppose_1 est de Delaunay
+/**
+ * Tests whether an edge is Delaunay.
+ * 
+ * @param i_face1 a face that contains the edge.
+ * @param i_vertex_oppose_1 the index of the vertex opposite the edge
+ * @returns true if Delaunay, false otherwise.
+ */
+bool Mesh::isDelaunay(int i_face1, int i_vertex_oppose_1)
 {
 
     Face face1 = facesTab[i_face1];
@@ -492,7 +503,7 @@ bool Mesh::isDelaunay(int i_face1, int i_vertex_oppose_1) // Dis si l'arete de f
  * @param vertex_oppose_1_initial the opposite vertex, belonging to the
  *     second triangle whose edge is common.
  * @returns the 2 edges that frame the flipped edge, and not being in
- *     the same initial triangle as vertex_oppose_1_initial
+ *     the same initial triangle as vertex_oppose_1_initial.
  */
 QList<std::pair<int, int>> Mesh::flipEdge(int i_face1, int i_vertex_oppose_1_initial)
 {
@@ -605,10 +616,16 @@ QList<std::pair<int, int>> Mesh::flipEdge(int i_face1, int i_vertex_oppose_1_ini
     return aretes_quadrilatere;
 }
 
-double Mesh::orientationTest(Vertex A, Vertex B, Vertex C) // Positif si A B Corientes dans le sens trigo, nul si alignes, negatif sinon
+/**
+ * Tests if A, B and C are oriented in the trigonometric direction.
+ * 
+ * @param A, B, C vertices for the orientation test.
+ * @returns double which is positive if A B C are oriented in the
+ *     trigonometric direction, zero if aligned, negative otherwise.
+*/
+double Mesh::orientationTest(Vertex A, Vertex B, Vertex C)
 {
     // On travaille dans le plan z = 0
-
     Vertex AB = B - A;
     Vertex BC = C - B;
 
@@ -620,22 +637,29 @@ double Mesh::orientationTest(Vertex A, Vertex B, Vertex C) // Positif si A B Cor
     return value;
 }
 
-double Mesh::inTriangleTest(Face face, Vertex P) // Positif si on est dans le triangle, 0 sur les bords, negatif si à l'exterieur
+/**
+ * Tests if a vertex is inside a face.
+ * 
+ * @param face used for the test.
+ * @param vertex we want to know if it's inside the face. 
+ * @returns double which is positive if the vertex is inside the
+ *     triangle, 0 if it is on an edge, negative if it is outside.
+*/
+double Mesh::inTriangleTest(Face face, Vertex vertex)
 {
     // On travaille dans le plan z = 0
-
     Vertex A = verticesTab[face.i_vertex[0]];
     Vertex B = verticesTab[face.i_vertex[1]];
     Vertex C = verticesTab[face.i_vertex[2]];
 
-    double test1 = orientationTest(A, B, P);
-    double test2 = orientationTest(B, C, P);
-    double test3 = orientationTest(C, A, P);
+    double test1 = orientationTest(A, B, vertex);
+    double test2 = orientationTest(B, C, vertex);
+    double test3 = orientationTest(C, A, vertex);
 
     if ((test1 > 0) && (test2 > 0) && (test3 > 0))
     {
         // Renvoi val strictement positive si toutes les orientation sont strictement positive
-        // Ou 0 si au moins une des orientations est nulle (ie P sur un bord)
+        // Ou 0 si au moins une des orientations est nulle (ie vertex sur un bord)
         return 1;
     }
     else if ((test1 >= 0) && (test2 >= 0) && (test3 >= 0))
@@ -650,7 +674,13 @@ double Mesh::inTriangleTest(Face face, Vertex P) // Positif si on est dans le tr
     };
 }
 
-void Mesh::insertionTriangle(int i_P, int i_face) // Insere le point P dans la face
+/**
+ * Insert a point in a face.
+ * 
+ * @param i_P index of the point to be inserted.
+ * @param i_face index of the face in which we want to insert the vertex.
+ */
+void Mesh::insertionTriangle(int i_P, int i_face)
 {
     Face old_face = facesTab[i_face];
 
@@ -730,7 +760,13 @@ void Mesh::insertionTriangle(int i_P, int i_face) // Insere le point P dans la f
     P.i_incident_face = i_ABP;
 }
 
-void Mesh::insertionInArete(int i_face1, int i_P) // Insere que point P qui est sur l'arete de face1
+/**
+ * Inserts a vertex on an edge
+ * 
+ * @param i_face1 index of the face containing the edge.
+ * @param i_P index of the vertex to be inserted.
+ */
+void Mesh::insertionInArete(int i_face1, int i_P)
 {
     Face face1 = facesTab[i_face1];
 
@@ -859,7 +895,10 @@ void Mesh::insertionInArete(int i_face1, int i_P) // Insere que point P qui est 
     P.i_incident_face = i_ABP;
 }
 
-void Mesh::naiveInsertion() // On creer un maillage naif à partir de points en inserant recursivement
+/**
+ * A naive mesh is created from points by inserting them successively.
+ */
+void Mesh::naiveInsertion()
 {
     // On ne prend pas en compte la dimension z
     // On part d'un maillage sans triangle, seulement des points
@@ -929,17 +968,13 @@ void Mesh::naiveInsertion() // On creer un maillage naif à partir de points en 
     triangle_hd.adjacent_faces[1] = -1;
     triangle_hd.adjacent_faces[2] = -1;
 
-    std::cout << "------ok------" << std::endl;
-
     for (int i_vertex = 0; i_vertex < (nb_vertex - 4); i_vertex++)
     {
-        std::cout << "i_vertex : " << i_vertex << std::endl;
         for (int i_face = 0; i_face < nb_faces; i_face++)
         {
 
             if (inTriangleTest(facesTab[i_face], verticesTab[i_vertex]) > 0)
             {
-                std::cout << "inTriangleTest : " << inTriangleTest(facesTab[i_face], verticesTab[i_vertex]) << std::endl;
                 insertionTriangle(i_vertex, i_face);
                 break;
             };
@@ -948,7 +983,14 @@ void Mesh::naiveInsertion() // On creer un maillage naif à partir de points en 
     };
 }
 
-bool Mesh::areteEnBordure(int i_face, int i_vertex) // Renvoie True si, de l'autre coté de l'arete, il n'y a rien (indice de face negatif)
+/**
+ * Tests whether the edge opposite the vertex is on the contour.
+ * 
+ * @param i_face index of the face containing the edge.
+ * @param i_vertex index of the vertex opposite the edge.
+ * @returns true if the edge is on the contour, false otherwise.
+ */
+bool Mesh::areteEnBordure(int i_face, int i_vertex)
 {
     if (facesTab[i_face].i_vertex[0] == i_vertex)
     {
@@ -968,7 +1010,12 @@ bool Mesh::areteEnBordure(int i_face, int i_vertex) // Renvoie True si, de l'aut
     };
 }
 
-void Mesh::lawsonAroundVertex(int i_P) // Après insertion de P dans face, flips autour de P jusqu'à ce que le triangle soit de Delaunay
+/**
+ * After inserting a vertex into a face, flip around the vertex until the triangle is Delaunay.
+ * 
+ * @param i_P index of the vertex
+ */
+void Mesh::lawsonAroundVertex(int i_P)
 {
     // On part d'un vertex i_P (dans i_face) qui vient d'être insere, et on fait des flips recursifs pour qu'a la fin il soit insere et tout soit Delaunay
     // On recupere les trois ou quatre aretes autour du P dans une file
@@ -1014,7 +1061,10 @@ void Mesh::lawsonAroundVertex(int i_P) // Après insertion de P dans face, flips
     };
 }
 
-void Mesh::naiveInsertionAndLawson() // Semblable a naiveInsertion, en assurant Delaunay après chaque insertion
+/**
+ * Similar to naiveInsertion, ensuring Delaunay after each insertion.
+ */
+void Mesh::naiveInsertionAndLawson()
 {
     // On ne prend pas en compte la dimension z
     // On part d'un maillage sans triangle, seulement des points
@@ -1108,6 +1158,13 @@ void Mesh::naiveInsertionAndLawson() // Semblable a naiveInsertion, en assurant 
 // --------Useful function for circulator--------
 // ----------------------------------------------
 
+/**
+ * Finds the index (0, 1 or 2) of a vertex belonging to a face
+ * 
+ * @param face we're working on
+ * @param i_vertex index of the vertex in the mesh
+ * @return 0, 1 or 2, the index of the vertex within the face
+ */
 int find_i_vertex_in_face(Face *face, int i_vertex)
 {
     int i_vertex_in_face = 0;
@@ -1122,8 +1179,17 @@ int find_i_vertex_in_face(Face *face, int i_vertex)
 // ------------Circulator on faces---------------
 // ----------------------------------------------
 
+/**
+ * Default constructor
+ */
 Circulator_on_faces::Circulator_on_faces() {}
 
+/**
+ * Constructor of the circulator, circulating on the faces around a vertex.
+ * 
+ * @param p_mesh_ the mesh we're working on
+ * @param i_vertex_ index of the vertex around which we want to turn.
+ */
 Circulator_on_faces::Circulator_on_faces(Mesh *p_mesh_, int i_vertex_)
 {
     p_mesh = p_mesh_;
@@ -1131,11 +1197,21 @@ Circulator_on_faces::Circulator_on_faces(Mesh *p_mesh_, int i_vertex_)
     i_face = p_mesh->verticesTab[i_vertex].i_incident_face; // Et l'indice de sa face adjacente
 }
 
+/**
+ * The initial state of the circulator.
+ * 
+ * @returns a new Circulator to its initial state.
+ */
 Circulator_on_faces Circulator_on_faces::begin() const
 {
     return Circulator_on_faces(p_mesh, i_vertex);
 }
 
+/**
+ * Move from one face to the next one.
+ * 
+ * @returns this
+ */
 Circulator_on_faces &Circulator_on_faces::operator++()
 {
     Face &incident_face = p_mesh->facesTab[i_face]; // On récupère l'objet face
@@ -1149,12 +1225,21 @@ Circulator_on_faces &Circulator_on_faces::operator++()
     return *this;
 }
 
+/**
+ * Get the face pointed by the Circulator
+ * 
+ * @returns a reference in the current face.
+ */
 Face &Circulator_on_faces::operator*()
 {
-    // returning a reference on the current face.
     return p_mesh->facesTab[i_face];
 }
 
+/**
+ * Tests if another circulator points in the same face.
+ * 
+ * @returns true if it's point in the same face. false otherwise.
+ */
 bool Circulator_on_faces::operator!=(const Circulator_on_faces other_circulator_on_faces)
 {
     return i_face != other_circulator_on_faces.i_face;
@@ -1164,6 +1249,12 @@ bool Circulator_on_faces::operator!=(const Circulator_on_faces other_circulator_
 // -------------Circulator on vertices-----------
 // ----------------------------------------------
 
+/**
+ * Constructor of the circulator, circulating on the vertices around a vertex.
+ * 
+ * @param p_mesh_ the mesh we're working on
+ * @param i_vertex_ index of the vertex around which we want to turn.
+ */
 Circulator_on_vertices::Circulator_on_vertices(Mesh *p_mesh_, int i_vertex_)
 {
     p_mesh = p_mesh_;
@@ -1197,8 +1288,13 @@ Circulator_on_vertices::Circulator_on_vertices(Mesh *p_mesh_, int i_vertex_)
     }
 }
 
+/**
+ * Move from one vertex to the next one.
+ * 
+ * @returns this
+ */
 Circulator_on_vertices &Circulator_on_vertices::operator++()
-{ // To end
+{
     current_i_vertex = next_i_vertex;
     ++circulator_on_faces;            // On passe à la prochaine face
     Face face = *circulator_on_faces; // On récupère l'objet face
@@ -1211,17 +1307,31 @@ Circulator_on_vertices &Circulator_on_vertices::operator++()
     return *this;
 }
 
+/**
+ * The initial state of the circulator.
+ * 
+ * @returns a new Circulator to its initial state.
+ */
 Circulator_on_vertices Circulator_on_vertices::begin() const
 {
     return Circulator_on_vertices(p_mesh, i_vertex);
 }
 
+/**
+ * Get the vertex pointed by the Circulator
+ * 
+ * @returns a reference in the current vertex.
+ */
 Vertex &Circulator_on_vertices::operator*()
 {
-    // returning a reference on the current vertex.
     return p_mesh->verticesTab[current_i_vertex];
 }
 
+/**
+ * Tests if another circulator points in the same vertex.
+ * 
+ * @returns true if it's point in the same vertex. false otherwise.
+ */
 bool Circulator_on_vertices::operator!=(const Circulator_on_vertices other_circulator_on_vertices)
 {
     return current_i_vertex != other_circulator_on_vertices.current_i_vertex;
