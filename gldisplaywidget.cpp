@@ -15,16 +15,26 @@ void glVertexDraw(const Vertex & p) {
 
 GLDisplayWidget::GLDisplayWidget(QWidget *parent) : QGLWidget(parent)
 {
+    // Initial point of view is set by _X, _Y, _Z
     _X = 0;
     _Y = 0;
     _Z = 0;
 
-    show_vertecis = false;
+    // The angle of the point of view.
+    // You can rotate the shape by clicking and dragging on it.
+    _angle = 0;
+
+    // When show_vertices is false, the vertices are not displayed
+    // When it becomes true, the vertices are displayed.
+    // You can switch from one value to another with the checkboxes on the GUI.
+    show_vertecis = false; 
     show_edges = false;
     show_faces = false;
     show_laplacian = false;
+
+    // The higher the value of this variable,
+    // the longer the representation of the Laplacian is extended
     coef_laplacian = 0;
-    _angle = 0;
 
     // Update the scene
     connect( &_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
@@ -33,7 +43,7 @@ GLDisplayWidget::GLDisplayWidget(QWidget *parent) : QGLWidget(parent)
 
 void GLDisplayWidget::initializeGL()
 {
-    // background color
+    // Background color
     glClearColor(0.2, 0.2, 0.2, 1);
 
     // Shader
