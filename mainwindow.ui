@@ -129,7 +129,7 @@
      <property name="title">
       <string>Laplacian</string>
      </property>
-     <widget class="QCheckBox" name="checkBox_Faces_2">
+     <widget class="QCheckBox" name="checkBox_Laplacian">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -142,7 +142,7 @@
        <string>Show Laplacian</string>
       </property>
      </widget>
-     <widget class="QSlider" name="horizontalSlider">
+     <widget class="QSlider" name="Laplacian_size_Slider">
       <property name="geometry">
        <rect>
         <x>10</x>

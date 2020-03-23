@@ -3,7 +3,8 @@
 
 #include <QMainWindow>
 
-namespace Ui {
+namespace Ui
+{
 class MainWindow;
 }
 
@@ -16,15 +17,12 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_checkBox_Vertices_stateChanged(int arg1);
+    void on_checkBox_Vertices_stateChanged(int arg);  // Called when the "show vertices" checkbox is checked
+    void on_checkBox_Edges_stateChanged(int arg);     // Called when the "show edges" checkbox is checked
+    void on_checkBox_Faces_stateChanged(int arg);     // Called when the "show faces" checkbox is checked
+    void on_checkBox_Laplacian_stateChanged(int arg); // Called when the "show Laplacian" checkbox is checked
 
-    void on_checkBox_Edges_stateChanged(int arg1);
-
-    void on_checkBox_Faces_stateChanged(int arg1);
-
-    void on_horizontalSlider_sliderMoved(int position);
-
-    void on_checkBox_Faces_2_stateChanged(int arg1);
+    void on_Laplacian_size_Slider_sliderMoved(int position); // Called the the slidebar of laplacian coef is slided
 
 private:
     Ui::MainWindow *ui;
