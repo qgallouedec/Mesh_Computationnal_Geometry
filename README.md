@@ -17,24 +17,31 @@ Si vous êtes sur MacOS, commenter les lignes 27 et 28 du fichier ```Mesh_Comput
 Exemple : ```queen.off```, ```cube.off```, ...
 
 
-Compléter la ligne 46 et 47 du fichier ```gldisplaywidget.cpp```:    
+Compléter la ligne 59 et 60 du fichier ```gldisplaywidget.cpp```:    
 
 ```c++
 // Construction of the mesh before it is displayed
-char path_to_off_files[512]="/path/to/directory/Mesh_Computationnal_Geometry/off_files/";
-char off_filename[64]="your_off_file.off";
+// Replace the values of the following two variables with
+// the path to the off-file of your choice
+// --------------------------------------------------------------------------------------
+char path_to_off_files[512] = "/path/to/directory/Mesh_Computationnal_Geometry/off_files/";
+char off_filename[64] = "your_off_file.off";
+// --------------------------------------------------------------------------------------
 ```
 
-Compléter les lignes 58 à 65 du fichier ```gldisplaywidget.cpp```, de manière à lancer uniquement ```parsefile```, ```sew``` et ```computeLaplacian``` :
+Compléter les lignes 68 à 77 du fichier ```gldisplaywidget.cpp```, de manière à lancer uniquement ```parsefile```, ```sew``` et ```computeLaplacian``` :
 
 ```c++
 // Construction of the mesh before it is displayed
 _mesh.parseFile(path_to_off_file);
 _mesh.sew();
 
+//Choose which action to apply to the selected file.
+// --------------------------------------------------------------------------------------
 _mesh.computeLaplacian();
 //_mesh.naiveInsertion();
 //_mesh.naiveInsertionAndLawson();
+// --------------------------------------------------------------------------------------
 ```
 
 Vous pourrez alors, sur la fenêtre obtenue, afficher les points, les arêtes, les faces et le laplacien. Vous pourrez régler la taille de ce dernier à l'aide du curseur.
@@ -53,16 +60,19 @@ Exemple de fichier : ```franke4.off```, ```franke5.off```, ...
 
 #### Triangulation simpliste :
 
-Compléter les lignes 58 à 65 du fichier ```gldisplaywidget.cpp```, de manière à lancer uniquement ```parsefile```, ```sew``` et ```naiveInsertion``` :
+Compléter les lignes 68 à 77 du fichier ```gldisplaywidget.cpp```, de manière à lancer uniquement ```parsefile```, ```sew``` et ```naiveInsertion``` :
 
 ```c++
 // Construction of the mesh before it is displayed
 _mesh.parseFile(path_to_off_file);
 _mesh.sew();
 
+//Choose which action to apply to the selected file.
+// --------------------------------------------------------------------------------------
 //_mesh.computeLaplacian();
 _mesh.naiveInsertion();
 //_mesh.naiveInsertionAndLawson();
+// --------------------------------------------------------------------------------------
 ```
 
 On obtient la triangulation naive dans la fenêtre. On pourra afficher les points, les arêtes et les faces, mais __pas le laplacien ici__.
@@ -73,16 +83,20 @@ Voici le rendu obtenu avec le fichier ```franke4.off```.
 
 #### Triangulation de Delaunay :
 
-Compléter les lignes 58 à 65 du fichier ```gldisplaywidget.cpp```, de manière à lancer uniquement ```parsefile```, ```sew``` et ```naiveInsertionAndLawson``` :
+Compléter les lignes 68 à 77 du fichier ```gldisplaywidget.cpp```, de manière à lancer uniquement ```parsefile```, ```sew``` et ```naiveInsertionAndLawson``` :
 
 ```c++
+// Construction of the mesh before it is displayed
 // Construction of the mesh before it is displayed
 _mesh.parseFile(path_to_off_file);
 _mesh.sew();
 
+//Choose which action to apply to the selected file.
+// --------------------------------------------------------------------------------------
 //_mesh.computeLaplacian();
 //_mesh.naiveInsertion();
 _mesh.naiveInsertionAndLawson();
+// --------------------------------------------------------------------------------------
 ```
 
 On obtient la triangulation optimale dans la fenêtre. Toutes les arêtes, sauf celles sur les bords, sont de Delaunay. On pourra afficher les points, les arêtes et les faces (ne pas toucher aux boutons relatifs au laplacien).
