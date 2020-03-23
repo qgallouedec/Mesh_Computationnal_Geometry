@@ -43,13 +43,13 @@ void GLDisplayWidget::initializeGL()
 
 
     // Construction of the mesh before it is displayed
-    // char path_to_off_files[512]="/path/to/directory/Mesh_Computationnal_Geometry/off_files/";
-    // char off_filename[64]="your_off_file.off";
+    char path_to_off_files[512]="/path/to/directory/Mesh_Computationnal_Geometry/off_files/";
+    char off_filename[64]="your_off_file.off";
 
 
     // char path_to_off_files[512]="/Users/quentingallouedec/GitHub/Mesh_Computationnal_Geometry/off_files/";
-    char path_to_off_files[512]="/Users/William/Desktop/ECL/SCOLAIRE/3A/OPTION ET MOS/CMGIG/Fichiers terrains OFF/";
-    char off_filename[64]="franke4.off";
+    // char path_to_off_files[512]="/Users/William/Desktop/ECL/SCOLAIRE/3A/OPTION ET MOS/CMGIG/Fichiers terrains OFF/";
+    // char off_filename[64]="franke5.off";
 
     char path_to_off_file[512]="";
     strcat (path_to_off_file, path_to_off_files);
@@ -59,10 +59,10 @@ void GLDisplayWidget::initializeGL()
     _mesh.parseFile(path_to_off_file);
     _mesh.sew();
 
-    _mesh.computeLaplacian();
+    //_mesh.computeLaplacian();
 
     //_mesh.naiveInsertion();
-    _mesh.naiveInsertionAndLawson();
+    //_mesh.naiveInsertionAndLawson();
 
 }
 
